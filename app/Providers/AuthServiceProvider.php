@@ -2,9 +2,10 @@
 
 namespace App\Providers;
 
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Passport\HasApiTokens;
+
 
 class AuthServiceProvider extends ServiceProvider
 {

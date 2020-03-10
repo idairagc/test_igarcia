@@ -15,11 +15,13 @@ class LoginController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    //http://127.0.0.1:8000/api/login?email=igc@gmail.com&password=12345678
+    //http://127.0.0.1:8000/api/login?email=igc@gmail.com&password=qwertyu
     public function login(Request $request)
     {
         if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
             $user = Auth::user(); 
-            $success['token'] =  $user->createToken('MyApp')->accessToken; 
+            $success['token'] =  $user->createToken('MyApp')->accessToken;  
             $success['name'] =  $user->name;
             
             $response = [
