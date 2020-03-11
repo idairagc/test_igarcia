@@ -2,38 +2,29 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\ResponseController;
 use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 
-class LoginController extends Controller
+//Clase para el login de usuarios
+class LoginController extends ResponseController
 {
-    /**
-     * Login api
-     *
-     * @return \Illuminate\Http\Response
-     */
-    //http://127.0.0.1:8000/api/login?email=igc@gmail.com&password=12345678
-    //http://127.0.0.1:8000/api/login?email=igc@gmail.com&password=qwertyu
+    //Api para el login de usuarios
     public function login(Request $request)
     {
+    	//autentifico el usuario
         if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){ 
             $user = Auth::user(); 
             $success['token'] =  $user->createToken('MyApp')->accessToken;  
             $success['name'] =  $user->name;
-            
-            $response = [
-	            'success' => true,
-	            'data'    => $success,
-	            'message' => 'User login successfully.',
-	        ];
-   
-            return response()->json($response, 200);
+   			
+   			//respuesta exitosa
+            return $this->sendResponse($success, 'User login successfully.');
         } 
-        else{ 
-            return response()->json(['error'=>'Unauthorised'], 401);
+        else{ //respuesta error
+            return $this->sendError('Unauthorised.', ['error'=>'Unauthorised'],401);
         } 
     }
 }
