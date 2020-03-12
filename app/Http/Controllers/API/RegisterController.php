@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\ResponseController;
+use App\Http\Controllers\API\ResponseController as ResponseController;
 use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +18,7 @@ class RegisterController extends ResponseController
     	//validaciones
         $validator = Validator::make($request->all(), [
             'name' => 'required',
+            'surname' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required',
             'c_password' => 'required|same:password',
@@ -25,7 +26,7 @@ class RegisterController extends ResponseController
    		
    		//si no cumple las validaciones responde con un error
         if($validator->fails()){
-            return $this->sendError('Validation Error.', $validator->errors(),400);       
+            return $this->sendError('Validation Error.', $validator->errors(),422);       
         }
    		
    		//si todo es correcto crea el usuario

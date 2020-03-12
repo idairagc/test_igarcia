@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller as Controller;
 use Illuminate\Http\Request;
 
 //En este controlodar gestionamos las respuestas de las apis

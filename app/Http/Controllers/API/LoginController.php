@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\API\ResponseController;
+use App\Http\Controllers\API\ResponseController as ResponseController;
 use Illuminate\Http\Request;
 use App\User;
 use Illuminate\Support\Facades\Auth;
