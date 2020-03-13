@@ -18,7 +18,7 @@ class CreateCustomersTable extends Migration
             $table->string('name');
             $table->string('surname');
             $table->string('email')->unique();
-            //$table->string('image')->default('');
+            $table->string('photo')->default('');
             //$table->string('thumbnail')->default('');
             $table->integer('user_id_create');
             $table->integer('user_id_update');

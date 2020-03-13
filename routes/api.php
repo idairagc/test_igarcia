@@ -25,5 +25,7 @@ Route::post('login', 'API\LoginController@login');
 Route::middleware('auth:api')->group( function () {
     //aqui irán el resto de rutas
     Route::resource('users', 'API\UserController');
+    //como el update de customers puede tener una imagen, hay que pasarlo con post
+    Route::post('customers/{customer}', 'API\CustomerController@update');
     Route::resource('customers', 'API\CustomerController');
 });

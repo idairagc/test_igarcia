@@ -11,6 +11,7 @@ use App\Http\Resources\Customer as CustomerResource;
 
 class CustomerController extends ResponseController
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -46,12 +47,14 @@ class CustomerController extends ResponseController
     public function store(Request $request)
     {
         $this->user = \Auth::user();
+
         $input = $request->all();
-   
+        
         $validator = Validator::make($input, [
             'name'      => 'required',
             'surname'   => 'required',
-            'email'     => 'required|email|unique:customers'
+            'email'     => 'required|email|unique:customers',
+            'photo'     => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
    
         if($validator->fails()){
@@ -59,6 +62,12 @@ class CustomerController extends ResponseController
         }
         $input['user_id_create'] = $this->user->id;
         $input['user_id_update'] = $this->user->id;
+        $file = $request->file('photo');
+        if (!empty($file)) {
+            $name=time().$file->getClientOriginalName();
+            $path= $file->move(public_path('images'),$name);
+            $input['photo'] = $name;
+        }
         $customer = Customer::create($input);
    
         return $this->sendResponse(new CustomerResource($customer), 'Customer created successfully.');
@@ -109,10 +118,11 @@ class CustomerController extends ResponseController
         
         $input = $request->all();
    
-        $validator = Validator::make($request->all(), [
+        $validator = Validator::make($input, [
             'name'       => 'required',
             'surname'    => 'required',
-            'email'      => 'sometimes|required|email|unique:customers'
+            'email'      => 'sometimes|required|email|unique:customers',
+            'photo'      => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
    
         if($validator->fails()){
@@ -123,6 +133,15 @@ class CustomerController extends ResponseController
         $customer->surname    = $input['surname'];
         $customer->email      = $input['email'];
         $customer->user_id_update = $this->user->id;
+        $file = $request->file('photo');
+        if (!empty($file)) {
+            if (!empty($customer->photo)) {
+                unlink(public_path('images'). '\\' .$customer->photo);
+            }
+            $name=time().$file->getClientOriginalName();
+            $path= $file->move(public_path('images'),$name);
+            $customer->photo = $name;
+        }
         $customer->update();
    
         return $this->sendResponse(new CustomerResource($customer), 'Customer updated successfully.');
@@ -139,6 +158,9 @@ class CustomerController extends ResponseController
         $customer = Customer::find($id);
         if (is_null($customer)) {
             return $this->sendError('User not found.');
+        }
+        if (!empty($customer->photo)) {
+            unlink(public_path('images'). '\\' .$customer->photo);
         }
         $customer->delete();
    
