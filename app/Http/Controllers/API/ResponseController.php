@@ -16,8 +16,8 @@ class ResponseController extends Controller
             'data'    => $result,
             'message' => $message,
         ];
-
-        return response()->json($response, 200);
+        //Siempre responde con codigo 200 OK
+        return response()->json($response, 200); 
     }
 
 
@@ -32,26 +32,24 @@ class ResponseController extends Controller
         if(!empty($errorMessages)){
             $response['data'] = $errorMessages;
         }
-
+        /*
+        TIPOS DE ERROR  (No los utilizamos todos)
+        201 Created 
+        204 No Content 
+        304 Not Modified 
+        400 Bad Request 
+        401 Unauthorized 
+        403 Forbidden 
+        404 Not Found 
+        405 Method Not Allowed
+        409 Conflict
+        410 Gone
+        415 Unsupported Media Type
+        422 Unprocessable Entity 
+        429 Too Many Requests
+        */
         return response()->json($response, $code);
     }
 
-    /*
-		TIPOS DE ERROR
-
-		200 OK 
-		201 Created 
-		204 No Content 
-		304 Not Modified 
-		400 Bad Request 
-		401 Unauthorized 
-		403 Forbidden 
-		404 Not Found 
-		405 Method Not Allowed
-		409 Conflict
-		410 Gone
-		415 Unsupported Media Type
-		422 Unprocessable Entity 
-		429 Too Many Requests
-    */
+    
 }

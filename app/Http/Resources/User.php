@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+//Formato de respuesta para las APis de los users
 class User extends JsonResource
 {
     /**
@@ -19,6 +20,7 @@ class User extends JsonResource
             'name' => $this->name,
             'surname' => $this->surname,
             'email' => $this->email,
+            //'password' => $this->password,
             'created_at' => $this->created_at->format('d/m/Y'),
             'updated_at' => $this->updated_at->format('d/m/Y'),
         ];

@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+//Formato de respuesta para las APis de los customers
 class Customer extends JsonResource
 {
     /**
@@ -14,6 +15,10 @@ class Customer extends JsonResource
      */
     public function toArray($request)
     {
+        if (!empty($this->photo)) {
+            $this->photo=public_path('images') . '\\' . $this->photo;
+        }
+        
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -21,9 +26,9 @@ class Customer extends JsonResource
             'email' => $this->email,
             'photo' => $this->photo,
             'created_at' => $this->created_at->format('d/m/Y'),
-            'user_id_create' => $this->user_id_create,
+            'user_id_created' => $this->user_id_created,
             'updated_at' => $this->updated_at->format('d/m/Y'),
-            'user_id_update' => $this->user_id_update,
+            'user_id_updated' => $this->user_id_updated,
         ];
     }
 }

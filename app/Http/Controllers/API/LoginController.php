@@ -20,10 +20,10 @@ class LoginController extends ResponseController
             $success['token'] =  $user->createToken('MyApp')->accessToken;  
             $success['name'] =  $user->name;
    			
-   			//respuesta exitosa
+   			//devuelve el token de autentificacion junto con un mensaje de éxito.
             return $this->sendResponse($success, 'User login successfully.');
         } 
-        else{ //respuesta error
+        else{ //respuesta de error si no está autentificado
             return $this->sendError('Unauthorised.', ['error'=>'Unauthorised'],401);
         } 
     }

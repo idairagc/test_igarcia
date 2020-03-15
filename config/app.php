@@ -166,7 +166,9 @@ return [
          * Package Service Providers...
          */
         Laravel\Passport\PassportServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class, //esta al final no la usé
+        Spatie\Permission\PermissionServiceProvider::class,
+
         /*
          * Application Service Providers...
          */

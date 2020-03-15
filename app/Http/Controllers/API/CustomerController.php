@@ -8,28 +8,32 @@ use App\Customer;
 use App\User; 
 use Validator;
 use App\Http\Resources\Customer as CustomerResource;
+use App\Traits\ImageTrait;
+use App\Traits\CustomerValidationRulesTrait;
 
+//Controlador de los Customers
 class CustomerController extends ResponseController
 {
-
+    use ImageTrait, CustomerValidationRulesTrait;
     /**
-     * Display a listing of the resource.
+     * Lista a los Customers
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        //Recuperamos todos los customers de bbdd
         $customers = Customer::all();
-        if(is_null($customers)){
+        //Si no hay customers enviamos un mensaje de error
+        if(count($customers) == 0){
             return $this->sendError('No customers.');
         }
-        else{
-            return $this->sendResponse(CustomerResource::collection($customers), 'Customers list successfully.');
-        }
+        //si no, la lista de customers junto con un mensaje de éxito.
+        return $this->sendResponse(CustomerResource::collection($customers), 'Customers list successfully.');
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Esta no se usa en api
      *
      * @return \Illuminate\Http\Response
      */
@@ -39,59 +43,57 @@ class CustomerController extends ResponseController
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo Customer
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
+        //recuperamos el usuario que lo está dando de alta, para actualizar los campos:
+        //user_id_created
+        //user_id_updated
         $this->user = \Auth::user();
 
+        //Recuperamos los datos que nos llegan del request
         $input = $request->all();
-        
-        $validator = Validator::make($input, [
-            'name'      => 'required',
-            'surname'   => 'required',
-            'email'     => 'required|email|unique:customers',
-            'photo'     => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-   
+        //Validamos los campos
+        $validator = Validator::make($input, $this->StoreValidationRules());
+        //Si no cumple la validación, enviamos un mensaje de error
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors());       
         }
-        $input['user_id_create'] = $this->user->id;
-        $input['user_id_update'] = $this->user->id;
-        $file = $request->file('photo');
-        if (!empty($file)) {
-            $name=time().$file->getClientOriginalName();
-            $path= $file->move(public_path('images'),$name);
-            $input['photo'] = $name;
-        }
+        $input['user_id_created'] = $this->user->id;
+        $input['user_id_updated'] = $this->user->id;
+        //Guardamos la photo
+        $input['photo'] =$this->uploadImage($request);
+        //creamos el Customer
         $customer = Customer::create($input);
-   
+
+        //Enviamos los datos del customer junto a un mensaje de éxito.
         return $this->sendResponse(new CustomerResource($customer), 'Customer created successfully.');
     }
 
     /**
-     * Display the specified resource.
+     * Muestra los datos de un Customer
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
+        //Recuperamos el customer de bbdd
         $customer = Customer::find($id);
-  
+        //Si no existe enviamos un mensaje de error
         if (is_null($customer)) {
             return $this->sendError('Customer not found.');
         }
-   
+        //Si existe devolvemos los datos del customer junto a un mensaje de éxito.
         return $this->sendResponse(new CustomerResource($customer), 'Customer retrieved successfully.');
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Esta no se usa en api
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
@@ -102,7 +104,7 @@ class CustomerController extends ResponseController
     }
 
     /**
-     * Update the specified resource in storage.
+     * Modifica los datos de un Customer
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -110,60 +112,60 @@ class CustomerController extends ResponseController
      */
     public function update(Request $request, $id)
     {
+        //recuperamos el usuario que lo está dando de alta, para actualizar el campos user_id_updated
         $this->user = \Auth::user();
+        //Recuperamos el customer de bbdd
         $customer = Customer::find($id);
+        //Si no existe devolvemos un mensaje de error
         if (is_null($customer)) {
             return $this->sendError('Customer not found.');
         }
-        
+        //si existe, recuperamos los datos que nos llegan del request y validamos
         $input = $request->all();
-   
-        $validator = Validator::make($input, [
-            'name'       => 'required',
-            'surname'    => 'required',
-            'email'      => 'sometimes|required|email|unique:customers',
-            'photo'      => 'sometimes|required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-   
+        $validator = Validator::make($input, $this->UpdateValidationRules($customer->id));
+        //Si no cumple la validación, devolvemos un mensaje de error
         if($validator->fails()){
             return $this->sendError('Validation Error.', $validator->errors(),422);        
         }
-   
+        //Si todo es correcto, actualizamos los datos
         $customer->name       = $input['name'];
         $customer->surname    = $input['surname'];
         $customer->email      = $input['email'];
-        $customer->user_id_update = $this->user->id;
-        $file = $request->file('photo');
-        if (!empty($file)) {
-            if (!empty($customer->photo)) {
-                unlink(public_path('images'). '\\' .$customer->photo);
-            }
-            $name=time().$file->getClientOriginalName();
-            $path= $file->move(public_path('images'),$name);
-            $customer->photo = $name;
-        }
+        $customer->user_id_updated = $this->user->id;
+        
+        //Gestionamos la photo
+        //Borramos la photo
+        $customer->photo = $this->destroyImage($customer->photo);
+        //Guardamos la photo
+        $customer->photo = $this->uploadImage($request);
+        
+        //modificamos los datos del customer
         $customer->update();
-   
+        //Devolvemos los datos del customer junto a un mensaje de éxito.
         return $this->sendResponse(new CustomerResource($customer), 'Customer updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina un Customer
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
+        //Buscamos el customer en bbdd
         $customer = Customer::find($id);
+        //Si no existe devolvemos un error
         if (is_null($customer)) {
-            return $this->sendError('User not found.');
+            return $this->sendError('Customer not found.');
         }
-        if (!empty($customer->photo)) {
-            unlink(public_path('images'). '\\' .$customer->photo);
-        }
+        //Borramos la photo
+        $customer->photo = $this->destroyImage($customer->photo);
+        
+        //borramos el customer
         $customer->delete();
-   
+        
+        //Enviamos un mensaje de éxito.
         return $this->sendResponse([], 'Customer deleted successfully.');
     }
 }
