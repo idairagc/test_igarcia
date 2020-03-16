@@ -198,9 +198,6 @@ Los roles que vamos a tener son:
 	Employee con id 2
 NOTA: estos los creará automáticamente el seeder.
 
-VISTAS A FUTURO
-Como se puede ver al usar MVC no habría problema en crear un Proveedor
-Del mismo modo que lo hicimos para el cliente, sólo tendríamos que crear el modelo, el controllador, la tabla de bbdd, etc.
 
 LISTA DE RUTAS:
 
